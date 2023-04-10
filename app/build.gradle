@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.schedule"
-        minSdk 23
+        minSdk 26
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -75,6 +75,10 @@ dependencies {
 
 //    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 //    implementation "androidx.fragment:fragment-ktx:1.5.5"
+
+    // Parser
+    implementation 'org.apache.poi:poi:5.2.3'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
 
     testImplementation 'junit:junit:4.13.2'
 
