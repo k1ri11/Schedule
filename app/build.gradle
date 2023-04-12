@@ -54,7 +54,7 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
 
     // Room
-    def room_version = "2.5.0"
+    def room_version = "2.5.1"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
@@ -69,11 +69,14 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$cor_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$cor_version"
 
-    def lifecycle_version = "2.5.1"
+    def lifecycle_version = "2.6.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 
-//    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+    implementation 'androidx.work:work-runtime-ktx:2.8.1'
+
+
 //    implementation "androidx.fragment:fragment-ktx:1.5.5"
 
     // Parser
