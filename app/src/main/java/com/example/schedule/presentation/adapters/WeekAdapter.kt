@@ -1,12 +1,10 @@
-package com.example.schedule.presentation
+package com.example.schedule.presentation.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.schedule.R
 import com.example.schedule.databinding.WeekItemBinding
+import com.example.schedule.presentation.Week
 
 class WeekAdapter(private val weeks: List<Week>) :
     RecyclerView.Adapter<WeekAdapter.WeekViewHolder>() {
