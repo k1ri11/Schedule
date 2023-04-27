@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:title="0"
+        android:icon="@drawable/fluent_home_12_filled"
+        android:id="@+id/Home" />
+    <item android:title="0"
+        android:icon="@drawable/simple_line_icons_calender"
+        android:id="@+id/Calendar" />
+    <item android:title="0"
+        android:icon="@drawable/army_tfw6fkr899mz_1"
+        android:id="@+id/Prepod"
+        />
+    <item android:title="0"
+        android:icon="@drawable/book_120884_1"
+        android:id="@+id/Notes"
+        />
+</menu>

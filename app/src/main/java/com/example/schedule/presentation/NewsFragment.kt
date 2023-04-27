@@ -6,13 +6,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.schedule.R
+import com.example.schedule.databinding.FragmentNewsBinding
 
-class BlankFragment : Fragment() {
-
+class NewsFragment : Fragment() {
+    private lateinit var binding: FragmentNewsBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
-        return inflater.inflate(R.layout.fragment_blank, container, false)
+    ): View {
+        super.onCreate(savedInstanceState)
+        binding = FragmentNewsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 }
+
