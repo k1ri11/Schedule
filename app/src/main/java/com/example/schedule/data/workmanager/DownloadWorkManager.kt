@@ -38,7 +38,7 @@ class DownloadWorkManager(
                 }
                 Result.success(
                     workDataOf(
-                        WorkerKeys.IMAGE_URI to file.canonicalPath
+                        WorkerKeys.FILE_URI to file.name
                     )
                 )
             }

@@ -1,58 +1,69 @@
 package com.example.schedule.domain.parser
 
-import android.content.Context
-import android.util.Log
-import com.example.schedule.domain.model.Lesson
+import com.example.schedule.data.model.Lesson
+import com.example.schedule.data.model.LessonType
+import com.example.schedule.domain.Resource
 import org.apache.poi.ss.usermodel.*
 import java.io.File
 import java.io.FileInputStream
+import javax.inject.Inject
 
-class ExelParser(
-    private val context: Context,
-) {
+class ExelParser @Inject constructor() {
+    private var parsedScheduleResult: Resource<Map<Int, MutableList<List<Lesson>>>> = Resource.Loading()
     private val platoonsWithSchedule = mutableMapOf<Int, MutableList<List<Lesson>>>()
+    private val lessonTimeMap =
+        mapOf(1 to "09:00 - 10:30", 2 to "10:40 - 12:10", 3 to "13:00 - 14:30", 4 to "14:40 - 16:10")
 
-    fun parse() {
-        val file = File(context.filesDir, "shedule_vuc.xlsx")
-        file.let {
-            try {
-                val workbookStream = FileInputStream(it)
-                val book = WorkbookFactory.create(workbookStream)
-                parseBook(book)
-            } catch (e: Exception) {
-                Log.d("SCHEDULE", "getExelFile: ${e.message} ")
-                e.printStackTrace()
-            }
+    fun getParsedData(): Resource<Map<Int, MutableList<List<Lesson>>>> {
+        return parsedScheduleResult
+    }
+
+    fun parse(file: File) {
+        parsedScheduleResult = Resource.Loading()
+        platoonsWithSchedule.clear()
+        try {
+            val workbookStream = FileInputStream(file)
+            val book = WorkbookFactory.create(workbookStream)
+            parseBook(book)
+        } catch (e: Exception) {
+            parsedScheduleResult = Resource.Error(e.message ?: "parse Error")
+            e.printStackTrace()
         }
     }
 
     private fun parseBook(book: Workbook) {
         if (book.numberOfSheets > 0) {
+            var weekNumber = 0
             val sheet = book.getSheetAt(0)
             var curRowNumber = 5
             repeat(4) {// читаем каждый месяц (страницу)
                 repeat(5) {//читаем каждый день недели
-                    parseDay(curRowNumber, sheet)
+                    parseDay(curRowNumber, sheet, weekNumber)
                     curRowNumber += 14
                 }
                 curRowNumber += 6
+                weekNumber += 4
             }
         }
-        print(platoonsWithSchedule)
+        parsedScheduleResult = Resource.Success(platoonsWithSchedule)
     }
 
-    private fun parseDay(curRowNumber: Int, sheet: Sheet) {
+    private fun parseDay(curRowNumber: Int, sheet: Sheet, weekNumber: Int) {
         var curColNumber = 3
+        var curWeekNumber = weekNumber
         val platoonRow = sheet.getRow(curRowNumber)
-        for (i in 0 until 16) { // парсим всю строку с 1 по 4 пару за один день
+        for (i in 1 .. 16) {
+            // парсим всю строку с 1 по 4 пару за один день
             val platoon = parsePlatoon(platoonRow, curColNumber)
             if (platoon == 0) {
                 curColNumber += 2
                 continue
             }
-            val lessons = parseLessons(curRowNumber + 1, curColNumber, sheet)
+            val lessons =
+                parseLessons(curRowNumber + 1, curColNumber, sheet, platoon, curWeekNumber)
             platoonsWithSchedule[platoon]?.add(lessons)
             curColNumber += 2
+            if (i % 4 == 0) curWeekNumber++
         }
     }
 
@@ -60,6 +71,8 @@ class ExelParser(
         RowStartNumber: Int,
         curColNumber: Int,
         sheet: Sheet,
+        platoon: Int,
+        curWeekNumber: Int
     ): List<Lesson> {
         var curRowNumber = RowStartNumber
         val lessons = mutableListOf<Lesson>()
@@ -73,11 +86,14 @@ class ExelParser(
             curRowNumber++
             if (lessonRooms[1].isEmpty()) continue // если праздничный или выходной день
             val platoonLesson = Lesson(
-                name = lessonsName,
-                classRoomDesc = lessonRooms[0],
+                platoonNumber = platoon,
+                lessonName = lessonsName,
+                lessonType = lessonRooms[0].toLessonType(),
                 classRoom = lessonRooms[1],
-                teacher1 = teachers[0],
-                teacher2 = teachers[1]
+                mainTeacher = teachers[0],
+                helpTeacher = teachers[1],
+                lessonTime = lessonTimeMap[i + 1]!!,
+                weekNumber = curWeekNumber + 1
             )
             lessons.add(platoonLesson)
         }
@@ -105,12 +121,22 @@ class ExelParser(
             val lessonRoomCell = lessonRoomRow.getCell(colNumber + it)
             if (lessonRoomCell?.cellType != CellType.BLANK) {
                 //есть прикол что одна ячейка может быть null
-                result.add(lessonRoomCell?.stringCellValue?.trim() ?: "")
+                result.add(lessonRoomCell?.stringCellValue?.trim()?.lowercase() ?: "")
             } else {
                 result.add("")
             }
         }
         return result
+    }
+
+    private fun String.toLessonType(): LessonType {
+        return when {
+            this.endsWith("/л") -> LessonType.Lecture
+            this.endsWith("/с") -> LessonType.Seminar
+            this.endsWith("з") -> LessonType.Practice
+            this.endsWith("зачет") -> LessonType.Test
+            else -> LessonType.SelfStudy
+        }
     }
 
     private fun parseLessonName(RowStartNumber: Int, colNumber: Int, sheet: Sheet): String {

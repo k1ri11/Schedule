@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
@@ -59,10 +60,10 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
-    // Dagger
-    def dagger_version = "2.44.2"
-    implementation "com.google.dagger:dagger:$dagger_version"
-    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    // Hilt
+    def hilt_version = "2.45"
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    kapt "com.google.dagger:hilt-compiler:$hilt_version"
 
     //Coroutines
     def cor_version = "1.6.4"
@@ -74,10 +75,8 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 
+    implementation "androidx.fragment:fragment-ktx:1.5.6"
     implementation 'androidx.work:work-runtime-ktx:2.8.1'
-
-
-//    implementation "androidx.fragment:fragment-ktx:1.5.5"
 
     // Parser
     implementation 'org.apache.poi:poi:5.2.3'
