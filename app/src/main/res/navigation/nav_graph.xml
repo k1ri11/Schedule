@@ -6,12 +6,23 @@
     app:startDestination="@id/newsFragment">
 
     <fragment
-        android:id="@+id/sheduleFragment"
-        android:name="com.example.schedule.presentation.sheduleFragment"
-        android:label="sheduleFragment" />
+        android:id="@+id/scheduleFragment"
+        android:name="com.example.schedule.presentation.fragments.ScheduleFragment"
+        android:label="fragment_schedule"
+        tools:layout="@layout/fragment_schedule"/>
     <fragment
         android:id="@+id/newsFragment"
-        android:name="com.example.schedule.presentation.NewsFragment"
+        android:name="com.example.schedule.presentation.fragments.NewsFragment"
         android:label="fragment_news"
         tools:layout="@layout/fragment_news" />
+    <fragment
+        android:id="@+id/notesFragment"
+        android:name="com.example.schedule.presentation.fragments.NotesFragment"
+        android:label="fragment_notes"
+        tools:layout="@layout/fragment_notes" />
+    <fragment
+        android:id="@+id/teachersFragment"
+        android:name="com.example.schedule.presentation.fragments.TeachersFragment"
+        android:label="fragment_teachers"
+        tools:layout="@layout/fragment_teachers" />
 </navigation>
