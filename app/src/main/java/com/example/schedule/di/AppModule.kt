@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import com.example.schedule.data.database.ScheduleDao
 import com.example.schedule.data.database.ScheduleDatabase
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,6 +30,11 @@ class AppModule {
     @Provides
     fun provideDao(db: ScheduleDatabase): ScheduleDao {
         return db.scheduleDao()
+    }
+
+    @Provides
+    fun provideFirebaseDatabase(): FirebaseFirestore {
+        return Firebase.firestore
     }
 
 }

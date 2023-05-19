@@ -1,10 +1,10 @@
 package com.example.schedule.data.model
 
-import androidx.annotation.DrawableRes
 
 data class News(
-    val newsText: String,
-    val newsId: String,
-    @DrawableRes val newsPhoto: Int
+    val title: String = "",
+    val date: String = "",
+    val text: String = "",
+    val images: List<String> = emptyList(),
 )
 

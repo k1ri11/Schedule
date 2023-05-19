@@ -5,9 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.schedule.data.database.ScheduleDao
 import com.example.schedule.data.model.Lesson
+import com.example.schedule.data.model.News
 import com.example.schedule.data.model.Platoon
 import com.example.schedule.domain.Resource
 import com.example.schedule.domain.parser.ExelParser
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
@@ -16,6 +18,7 @@ class ScheduleRepository @Inject constructor(
     private val exelParser: ExelParser,
     @ApplicationContext private val context: Context,
     private val dao: ScheduleDao,
+    private val cloudStore: FirebaseFirestore
 ) {
 
     private val _parseState = MutableLiveData<Resource<String>>(Resource.Loading())
@@ -23,6 +26,9 @@ class ScheduleRepository @Inject constructor(
 
     private val _platoonSchedule = MutableLiveData<Resource<List<Lesson>>>(Resource.Loading())
     val platoonSchedule: LiveData<Resource<List<Lesson>>> = _platoonSchedule
+
+    private val _news = MutableLiveData<Resource<List<News>>>(Resource.Loading())
+    val news: LiveData<Resource<List<News>>> = _news
 
     suspend fun parseExelAndUpdateDatabase(course: Int) {
         val file = when (course) {
@@ -53,9 +59,22 @@ class ScheduleRepository @Inject constructor(
     }
 
     fun getPlatoonWithLessons(platoonNumber: Int, weekNumber: Int) {
-        // todo coroutineExceptionHandlers
         val result = dao.getPlatoonWithLessons(platoonNumber, weekNumber)
         _platoonSchedule.postValue(Resource.Success(result))
+    }
+
+    fun getNews(){
+        _news.postValue(Resource.Loading())
+        val news = mutableListOf<News>()
+        cloudStore.collection("news").get().addOnSuccessListener {
+            it.forEach {snap ->
+                val item = snap.toObject(News::class.java)
+                news.add(item)
+            }
+            _news.postValue(Resource.Success(news))
+        }.addOnFailureListener {
+            _news.postValue(Resource.Error("${it.message}"))
+        }
     }
 
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.schedule.data.model.Lesson
+import com.example.schedule.data.model.News
 import com.example.schedule.data.repository.ScheduleRepository
 import com.example.schedule.domain.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +17,8 @@ class ScheduleViewModel @Inject constructor(
     private val repository: ScheduleRepository
 ): ViewModel() {
 
+    val news: LiveData<Resource<List<News>>> = repository.news
+
     val parseState: LiveData<Resource<String>> = repository.parseState
 
     val platoonSchedule: LiveData<Resource<List<Lesson>>> = repository.platoonSchedule
@@ -26,5 +29,9 @@ class ScheduleViewModel @Inject constructor(
 
     fun getPlatoonWithLessons(platoonNumber: Int, weekNumber: Int) = viewModelScope.launch(Dispatchers.IO){
         repository.getPlatoonWithLessons(platoonNumber, weekNumber)
+    }
+
+    fun getNews() = viewModelScope.launch(Dispatchers.IO){
+        repository.getNews()
     }
 }
