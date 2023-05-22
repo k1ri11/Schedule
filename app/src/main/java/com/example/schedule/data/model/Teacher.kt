@@ -5,7 +5,8 @@ data class Teacher(
     val post: String = "",
     val email: String = "",
     val telephone: String = "",
-    val classRoom: String = ""
+    val classRoom: String = "",
+    val image: String = ""
 )
 
 
