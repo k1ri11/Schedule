@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.schedule.data.model.Lesson
 import com.example.schedule.data.model.News
+import com.example.schedule.data.model.Teacher
 import com.example.schedule.data.repository.ScheduleRepository
 import com.example.schedule.domain.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +19,7 @@ class ScheduleViewModel @Inject constructor(
 ) : ViewModel() {
 
     val news: LiveData<Resource<List<News>>> = repository.news
+    val teachers: LiveData<Resource<List<Teacher>>> = repository.teachers
     val parseState: LiveData<Resource<String>> = repository.parseState
     val downloadingState: LiveData<Resource<String>> = repository.downloadingState
     val platoonSchedule: LiveData<Resource<List<Lesson>>> = repository.platoonSchedule
