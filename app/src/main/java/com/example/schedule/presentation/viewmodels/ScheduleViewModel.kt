@@ -19,10 +19,11 @@ class ScheduleViewModel @Inject constructor(
 
     val news: LiveData<Resource<List<News>>> = repository.news
     val parseState: LiveData<Resource<String>> = repository.parseState
+    val downloadingState: LiveData<Resource<String>> = repository.downloadingState
     val platoonSchedule: LiveData<Resource<List<Lesson>>> = repository.platoonSchedule
 
-    fun parseExelAndUpdateDatabase(course: Int) = viewModelScope.launch(Dispatchers.IO) {
-        repository.parseExelAndUpdateDatabase(course)
+    fun parseExelAndUpdateDatabase(fileName: String) = viewModelScope.launch(Dispatchers.IO) {
+        repository.parseExelAndUpdateDatabase(fileName)
     }
     fun getPlatoonWithLessons(platoonNumber: Int, weekNumber: Int) =
         viewModelScope.launch(Dispatchers.IO) {
@@ -35,5 +36,9 @@ class ScheduleViewModel @Inject constructor(
     }
     fun getTeachers() = viewModelScope.launch(Dispatchers.IO) {
         repository.getTeachers()
+    }
+
+    fun downloadSchedule(course: Int) = viewModelScope.launch(Dispatchers.IO) {
+        repository.downloadSchedule(course)
     }
 }

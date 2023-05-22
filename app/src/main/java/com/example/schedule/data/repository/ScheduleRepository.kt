@@ -11,18 +11,21 @@ import com.example.schedule.data.model.Teacher
 import com.example.schedule.domain.Resource
 import com.example.schedule.domain.parser.ExelParser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.StorageReference
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import javax.inject.Inject
 
 class ScheduleRepository @Inject constructor(
     private val exelParser: ExelParser,
     @ApplicationContext private val context: Context,
     private val dao: ScheduleDao,
-    private val cloudStore: FirebaseFirestore
+    private val cloudStore: FirebaseFirestore,
+    private val fireStore: StorageReference
 ) {
+
+    private val _downloadingState = MutableLiveData<Resource<String>>(Resource.Loading())
+    val downloadingState: LiveData<Resource<String>> = _downloadingState
 
     private val _parseState = MutableLiveData<Resource<String>>(Resource.Loading())
     val parseState: LiveData<Resource<String>> = _parseState
@@ -37,9 +40,22 @@ class ScheduleRepository @Inject constructor(
     val teachers: LiveData<Resource<List<Teacher>>> = _teachers
 
 
+    suspend fun downloadSchedule(course: Int){
+        _downloadingState.postValue(Resource.Loading())
+        val file = File(context.filesDir, "downloaded_course_$course.xlsx")
+        val task = fireStore.child("shedule_vuc_$course.xlsx").getFile(file)
+        task.addOnCompleteListener {
+            _downloadingState.postValue(Resource.Success(file.name))
+        }
+        task.addOnFailureListener{exception ->
+            _downloadingState.postValue(Resource.Error(exception.message ?: "download Failed"))
+        }
+    }
 
-    suspend fun parseExelAndUpdateDatabase(course: Int) {
-        val file = getFile(course)
+
+
+    suspend fun parseExelAndUpdateDatabase(fileName: String) {
+        val file = File(context.filesDir, fileName)
         exelParser.parse(file)
         val parsedData = exelParser.getParsedData()
         if (parsedData is Resource.Success) {
@@ -94,24 +110,6 @@ class ScheduleRepository @Inject constructor(
     }
 
     fun getPlatoons() = dao.getPlatoons()
-
-    private fun getFile(course: Int): File {
-        val cacheFile = File(context.filesDir, "shedule_vuc_$course.xlsx")
-        try {
-            val inputStream = context.assets.open("shedule_vuc_$course.xlsx")
-            val outputStream = FileOutputStream(cacheFile)
-            try {
-                inputStream.copyTo(outputStream)
-            } finally {
-                inputStream.close()
-                outputStream.close()
-            }
-        } catch (e: IOException) {
-            _parseState.postValue(Resource.Error("can't get file"))
-            throw IOException("can't get file", e)
-        }
-        return cacheFile
-    }
 
 
 }

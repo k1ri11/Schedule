@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
-class ScheduleFragment :Fragment(),  WeekAdapter.OnItemClickListener  {
+class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
     private lateinit var binding: FragmentScheduleBinding
 
     lateinit var viewModel: ScheduleViewModel
@@ -52,6 +52,7 @@ class ScheduleFragment :Fragment(),  WeekAdapter.OnItemClickListener  {
         viewModel = tmpViewModel
         prefs = requireContext().getSharedPreferences("storage", Context.MODE_PRIVATE)
         setupSettingsButtonListener()
+        setupDownloadingStateObserver()
         checkPreviousUIState()
         setupRecyclers()
         if (viewState.platoon == 0 || viewState.course == 0) setupDialog()
@@ -81,14 +82,26 @@ class ScheduleFragment :Fragment(),  WeekAdapter.OnItemClickListener  {
             requireContext(),
             com.google.android.material.R.style.ThemeOverlay_Material3_DayNight_BottomSheetDialog
         )
+        dialog.setCancelable(false)
         dialogBinding = DialogSelectPlatoonBinding.inflate(LayoutInflater.from(requireContext()))
         dialog.setContentView(dialogBinding.root)
         setupCourseSpinner()
         dialogBinding.saveButton.setOnClickListener {
             if (dialogBinding.platoonSpinner.adapter == null) {
-                viewState.course = dialogBinding.courseSpinner.selectedItemPosition + 3
-                startDownloadingAndUpdatingDatabase()
-                showPlatoonSection()
+                val newCourse = dialogBinding.courseSpinner.selectedItemPosition + 3
+                if (newCourse == viewState.course) {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val platoons = viewModel.getAllPlatoons()
+                        viewState.platoonNumbers = platoons.map { it.platoonNumber }
+                    }
+                    showPlatoonSection()
+                    setupPlatoonSpinner(viewState.platoonNumbers)
+                } else {
+                    viewState.course = dialogBinding.courseSpinner.selectedItemPosition + 3
+                    viewModel.downloadSchedule(viewState.course)
+
+                    showPlatoonSection()
+                }
             } else {
                 setupRecyclers()
                 val course = dialogBinding.courseSpinner.selectedItemPosition + 3
@@ -145,8 +158,12 @@ class ScheduleFragment :Fragment(),  WeekAdapter.OnItemClickListener  {
 
                 is Resource.Error -> {
                     hideProgressBar()
-                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()}
-                is Resource.Loading -> { showProgressBar() }
+                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
+                }
+
+                is Resource.Loading -> {
+                    showProgressBar()
+                }
             }
         }
     }
@@ -162,11 +179,15 @@ class ScheduleFragment :Fragment(),  WeekAdapter.OnItemClickListener  {
                         Toast.makeText(requireContext(), "Выходной", Toast.LENGTH_SHORT).show()
                     }
                 }
+
                 is Resource.Error -> {
                     hideProgressBar()
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
                 }
-                is Resource.Loading -> { showProgressBar() }
+
+                is Resource.Loading -> {
+                    showProgressBar()
+                }
             }
         }
     }
@@ -196,6 +217,23 @@ class ScheduleFragment :Fragment(),  WeekAdapter.OnItemClickListener  {
         platoonSpinner.adapter = platoonAdapter
     }
 
+    private fun setupDownloadingStateObserver() {
+        viewModel.downloadingState.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is Resource.Success -> {
+                    Toast.makeText(requireContext(), "Successfully downloaded", Toast.LENGTH_SHORT)
+                        .show()
+                    viewModel.parseExelAndUpdateDatabase(result.data!!)
+                }
+
+                is Resource.Error -> {
+                    Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
+                }
+
+                is Resource.Loading -> {}
+            }
+        }
+    }
 
     private fun startDownloadingAndUpdatingDatabase() {
         val workInfo = requireContext().applicationContext.startWorker(viewState.course)
@@ -206,7 +244,7 @@ class ScheduleFragment :Fragment(),  WeekAdapter.OnItemClickListener  {
                     Toast.makeText(requireContext(), "downloading successful", Toast.LENGTH_SHORT)
                         .show()
                     val fileName = info.outputData.keyValueMap[WorkerKeys.FILE_URI] as String
-                    viewModel.parseExelAndUpdateDatabase(viewState.course)
+                    viewModel.parseExelAndUpdateDatabase(fileName)
                 }
 
                 WorkInfo.State.FAILED -> {
@@ -223,11 +261,11 @@ class ScheduleFragment :Fragment(),  WeekAdapter.OnItemClickListener  {
         viewModel.getPlatoonWithLessons(viewState.platoon, position + 1)
     }
 
-    private fun showProgressBar(){
+    private fun showProgressBar() {
         binding.progressBar.visibility = View.VISIBLE
     }
 
-    private fun hideProgressBar(){
+    private fun hideProgressBar() {
         binding.progressBar.visibility = View.GONE
     }
 
