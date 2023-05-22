@@ -7,11 +7,14 @@ import com.example.schedule.data.database.ScheduleDao
 import com.example.schedule.data.model.Lesson
 import com.example.schedule.data.model.News
 import com.example.schedule.data.model.Platoon
+import com.example.schedule.data.model.Teacher
 import com.example.schedule.domain.Resource
 import com.example.schedule.domain.parser.ExelParser
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import javax.inject.Inject
 
 class ScheduleRepository @Inject constructor(
@@ -30,15 +33,14 @@ class ScheduleRepository @Inject constructor(
     private val _news = MutableLiveData<Resource<List<News>>>(Resource.Loading())
     val news: LiveData<Resource<List<News>>> = _news
 
+    private val _teachers = MutableLiveData<Resource<List<Teacher>>>(Resource.Loading())
+    val teachers: LiveData<Resource<List<Teacher>>> = _teachers
+
+
+
     suspend fun parseExelAndUpdateDatabase(course: Int) {
-        val file = when (course) {
-            3 -> File(context.filesDir, "shedule_vuc.xlsx")
-            4 -> File(context.filesDir, "shedule_vuc.xlsx")
-            5 -> File(context.filesDir, "shedule_vuc.xlsx")
-            else -> null
-        }
-        file?.let { exelParser.parse(it) }
-            ?: _parseState.postValue(Resource.Error("can't get file"))
+        val file = getFile(course)
+        exelParser.parse(file)
         val parsedData = exelParser.getParsedData()
         if (parsedData is Resource.Success) {
             val platoons = parsedData.data!!.keys.map { Platoon(platoonNumber = it) }
@@ -76,5 +78,40 @@ class ScheduleRepository @Inject constructor(
             _news.postValue(Resource.Error("${it.message}"))
         }
     }
+
+    fun getTeachers(){
+        _teachers.postValue(Resource.Loading())
+        val teachers = mutableListOf<Teacher>()
+        cloudStore.collection("teachers").get().addOnSuccessListener {
+            it.forEach {snap ->
+                val item = snap.toObject(Teacher::class.java)
+                teachers.add(item)
+            }
+            _teachers.postValue(Resource.Success(teachers))
+        }.addOnFailureListener {
+            _teachers.postValue(Resource.Error("${it.message}"))
+        }
+    }
+
+    fun getPlatoons() = dao.getPlatoons()
+
+    private fun getFile(course: Int): File {
+        val cacheFile = File(context.filesDir, "shedule_vuc_$course.xlsx")
+        try {
+            val inputStream = context.assets.open("shedule_vuc_$course.xlsx")
+            val outputStream = FileOutputStream(cacheFile)
+            try {
+                inputStream.copyTo(outputStream)
+            } finally {
+                inputStream.close()
+                outputStream.close()
+            }
+        } catch (e: IOException) {
+            _parseState.postValue(Resource.Error("can't get file"))
+            throw IOException("can't get file", e)
+        }
+        return cacheFile
+    }
+
 
 }

@@ -15,23 +15,25 @@ import javax.inject.Inject
 @HiltViewModel
 class ScheduleViewModel @Inject constructor(
     private val repository: ScheduleRepository
-): ViewModel() {
+) : ViewModel() {
 
     val news: LiveData<Resource<List<News>>> = repository.news
-
     val parseState: LiveData<Resource<String>> = repository.parseState
-
     val platoonSchedule: LiveData<Resource<List<Lesson>>> = repository.platoonSchedule
 
-    fun parseExelAndUpdateDatabase(course: Int) = viewModelScope.launch(Dispatchers.IO){
+    fun parseExelAndUpdateDatabase(course: Int) = viewModelScope.launch(Dispatchers.IO) {
         repository.parseExelAndUpdateDatabase(course)
     }
+    fun getPlatoonWithLessons(platoonNumber: Int, weekNumber: Int) =
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.getPlatoonWithLessons(platoonNumber, weekNumber)
+        }
+    fun getAllPlatoons() = repository.getPlatoons()
 
-    fun getPlatoonWithLessons(platoonNumber: Int, weekNumber: Int) = viewModelScope.launch(Dispatchers.IO){
-        repository.getPlatoonWithLessons(platoonNumber, weekNumber)
-    }
-
-    fun getNews() = viewModelScope.launch(Dispatchers.IO){
+    fun getNews() = viewModelScope.launch(Dispatchers.IO) {
         repository.getNews()
+    }
+    fun getTeachers() = viewModelScope.launch(Dispatchers.IO) {
+        repository.getTeachers()
     }
 }
