@@ -3,7 +3,11 @@ package com.example.schedule.domain.parser
 import com.example.schedule.data.model.Lesson
 import com.example.schedule.data.model.LessonType
 import com.example.schedule.domain.Resource
-import org.apache.poi.ss.usermodel.*
+import org.apache.poi.ss.usermodel.CellType
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.io.File
 import java.io.FileInputStream
 import javax.inject.Inject
@@ -57,6 +61,7 @@ class ExelParser @Inject constructor() {
             val platoon = parsePlatoon(platoonRow, curColNumber)
             if (platoon == 0) {
                 curColNumber += 2
+                if (i % 4 == 0) curWeekNumber++
                 continue
             }
             val lessons =
