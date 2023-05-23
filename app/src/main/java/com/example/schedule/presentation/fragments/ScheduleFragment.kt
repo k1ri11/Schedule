@@ -75,6 +75,8 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
         val platoon = prefs.getInt("platoon", 0)
         viewState.course = course
         viewState.platoon = platoon
+        binding.selectedPlatoon.text = resources.getString(R.string.selected_platoon, platoon)
+
     }
 
     private fun setupDialog() {
@@ -93,15 +95,13 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
                     lifecycleScope.launch(Dispatchers.IO) {
                         val platoons = viewModel.getAllPlatoons()
                         viewState.platoonNumbers = platoons.map { it.platoonNumber }
+                        withContext(Dispatchers.Main) { setupPlatoonSpinner(viewState.platoonNumbers) }
                     }
-                    showPlatoonSection()
-                    setupPlatoonSpinner(viewState.platoonNumbers)
                 } else {
                     viewState.course = dialogBinding.courseSpinner.selectedItemPosition + 3
                     viewModel.downloadSchedule(viewState.course)
-
-                    showPlatoonSection()
                 }
+                showPlatoonSection()
             } else {
                 setupRecyclers()
                 val course = dialogBinding.courseSpinner.selectedItemPosition + 3
@@ -111,6 +111,7 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
                 viewState.platoon = platoonNumber
                 updateUIStatePrefs()
                 viewModel.getPlatoonWithLessons(platoonNumber, 2)
+                binding.selectedPlatoon.text = resources.getString(R.string.selected_platoon, platoonNumber)
                 dialog.dismiss()
             }
         }
@@ -147,8 +148,6 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
             when (result) {
                 is Resource.Success -> {
                     hideProgressBar()
-                    Toast.makeText(requireContext(), "Successfully parsed", Toast.LENGTH_SHORT)
-                        .show()
                     lifecycleScope.launch(Dispatchers.IO) {
                         val platoons = viewModel.getAllPlatoons()
                         viewState.platoonNumbers = platoons.map { it.platoonNumber }
@@ -208,21 +207,21 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
     }
 
     private fun setupPlatoonSpinner(platoonNumbers: List<Int>) {
-        val platoonSpinner = dialogBinding.platoonSpinner
-        val platoonAdapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            platoonNumbers
-        )
-        platoonSpinner.adapter = platoonAdapter
+        if (this::dialogBinding.isInitialized){
+            val platoonSpinner = dialogBinding.platoonSpinner
+            val platoonAdapter = ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                platoonNumbers
+            )
+            platoonSpinner.adapter = platoonAdapter
+        }
     }
 
     private fun setupDownloadingStateObserver() {
         viewModel.downloadingState.observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Resource.Success -> {
-                    Toast.makeText(requireContext(), "Successfully downloaded", Toast.LENGTH_SHORT)
-                        .show()
                     viewModel.parseExelAndUpdateDatabase(result.data!!)
                 }
 
