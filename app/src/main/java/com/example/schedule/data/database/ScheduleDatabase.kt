@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import com.example.schedule.data.model.*
 
 @Database(
-    entities = [Platoon::class, Lesson::class],
+    entities = [Platoon::class, Lesson::class, Note::class],
     version = 1
 )
 @TypeConverters(Converters::class)

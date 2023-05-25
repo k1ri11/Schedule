@@ -1,5 +1,6 @@
 package com.example.schedule.data.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.schedule.data.model.*
 
@@ -23,4 +24,16 @@ interface ScheduleDao {
 
     @Query("DELETE FROM platoons")
     fun clearPlatoonsTable()
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(note : Note)
+
+    @Update
+    suspend fun update(note: Note)
+
+    @Delete
+    suspend fun delete(note: Note)
+
+    @Query("Select * from notesTable order by id ASC")
+    fun getAllNotes(): List<Note>
 }

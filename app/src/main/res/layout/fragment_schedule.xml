@@ -32,14 +32,16 @@
         android:id="@+id/selected_platoon"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/selected_platoon"
-        android:paddingTop="16dp"
+        android:background="@color/main_background"
         android:paddingHorizontal="15dp"
-        android:textColor="@color/white"
+        android:paddingTop="1dp"
+        android:text="@string/selected_platoon"
+        android:textAlignment="textEnd"
+        android:textColor="@color/shedule1_background"
+
         android:textSize="20sp"
-        android:background="@color/top_background"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 
     <LinearLayout
         android:id="@+id/linearLayout3"
@@ -78,7 +80,7 @@
         android:paddingHorizontal="15dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/selected_platoon">
+        >
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/some_id"
@@ -93,6 +95,7 @@
 
         <ImageButton
             android:id="@+id/settings_button"
+            android:layout_marginTop="10dp"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/week_background"
@@ -107,8 +110,10 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="@+id/imageView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout3">
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout3"
+        app:layout_constraintVertical_bias="0.0">
 
     </androidx.recyclerview.widget.RecyclerView>
 

@@ -3,9 +3,11 @@ package com.example.schedule.data.repository
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.room.Dao
 import com.example.schedule.data.database.ScheduleDao
 import com.example.schedule.data.model.Lesson
 import com.example.schedule.data.model.News
+import com.example.schedule.data.model.Note
 import com.example.schedule.data.model.Platoon
 import com.example.schedule.data.model.Teacher
 import com.example.schedule.domain.Resource
@@ -27,6 +29,9 @@ class ScheduleRepository @Inject constructor(
     private val _downloadingState = MutableLiveData<Resource<String>>(Resource.Loading())
     val downloadingState: LiveData<Resource<String>> = _downloadingState
 
+    private val _getNotes = MutableLiveData<List<Note>>()
+    val getNotes: LiveData<List<Note>> = _getNotes
+
     private val _parseState = MutableLiveData<Resource<String>>(Resource.Loading())
     val parseState: LiveData<Resource<String>> = _parseState
 
@@ -40,18 +45,17 @@ class ScheduleRepository @Inject constructor(
     val teachers: LiveData<Resource<List<Teacher>>> = _teachers
 
 
-    suspend fun downloadSchedule(course: Int){
+    suspend fun downloadSchedule(course: Int) {
         _downloadingState.postValue(Resource.Loading())
         val file = File(context.filesDir, "downloaded_course_$course.xlsx")
         val task = fireStore.child("shedule_vuc_$course.xlsx").getFile(file)
         task.addOnCompleteListener {
             _downloadingState.postValue(Resource.Success(file.name))
         }
-        task.addOnFailureListener{exception ->
+        task.addOnFailureListener { exception ->
             _downloadingState.postValue(Resource.Error(exception.message ?: "download Failed"))
         }
     }
-
 
 
     suspend fun parseExelAndUpdateDatabase(fileName: String) {
@@ -81,11 +85,11 @@ class ScheduleRepository @Inject constructor(
         _platoonSchedule.postValue(Resource.Success(result))
     }
 
-    fun getNews(){
+    fun getNews() {
         _news.postValue(Resource.Loading())
         val news = mutableListOf<News>()
         cloudStore.collection("news").get().addOnSuccessListener {
-            it.forEach {snap ->
+            it.forEach { snap ->
                 val item = snap.toObject(News::class.java)
                 news.add(item)
             }
@@ -95,11 +99,11 @@ class ScheduleRepository @Inject constructor(
         }
     }
 
-    fun getTeachers(){
+    fun getTeachers() {
         _teachers.postValue(Resource.Loading())
         val teachers = mutableListOf<Teacher>()
         cloudStore.collection("teachers").get().addOnSuccessListener {
-            it.forEach {snap ->
+            it.forEach { snap ->
                 val item = snap.toObject(Teacher::class.java)
                 teachers.add(item)
             }
@@ -111,5 +115,20 @@ class ScheduleRepository @Inject constructor(
 
     fun getPlatoons() = dao.getPlatoons()
 
+    suspend fun getNotes() {
+        _getNotes.postValue(dao.getAllNotes())
+    }
+
+    suspend fun insert(note: Note) {
+        dao.insert(note)
+    }
+
+    suspend fun delete(note: Note) {
+        dao.delete(note)
+    }
+
+    suspend fun update(note: Note) {
+        dao.update(note)
+    }
 
 }

@@ -14,6 +14,8 @@
     <color name="text_color">#15181A</color>
     <color name="shedule_background">#F22C2F33</color>
     <color name="shedule1_background">#90FFFFFF</color>
+    <color name="black_shade_1">#0e2433</color>
+    <color name="black_shade_2">#1C4966</color>
 
 
 </resources>
