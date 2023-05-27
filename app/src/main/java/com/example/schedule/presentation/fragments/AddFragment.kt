@@ -6,16 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.schedule.R
-import com.example.schedule.databinding.FragmentAddBinding
 import com.example.schedule.data.model.Note
+import com.example.schedule.databinding.FragmentAddBinding
 import com.example.schedule.presentation.viewmodels.ScheduleViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 @AndroidEntryPoint
 class AddFragment : Fragment() {
@@ -70,7 +70,6 @@ class AddFragment : Fragment() {
                     val updatedNote = Note(title, description, currentDateAndTime)
                     updatedNote.id = noteID
                     viewModel.updateNote(updatedNote)
-                    Toast.makeText(requireContext(), "Note Updated", Toast.LENGTH_LONG).show()
                 }
             } else {
                 if (title.isNotEmpty() && description.isNotEmpty()) {
@@ -78,7 +77,6 @@ class AddFragment : Fragment() {
                     val currentDateAndTime: String = sdf.format(Date())
                     val newNote = Note(title, description, currentDateAndTime)
                     viewModel.addNote(newNote)
-                    Toast.makeText(requireContext(), "$title Added", Toast.LENGTH_LONG).show()
                 }
             }
 

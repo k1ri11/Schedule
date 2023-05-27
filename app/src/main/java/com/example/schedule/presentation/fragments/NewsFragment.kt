@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.schedule.R
 import com.example.schedule.data.model.News
 import com.example.schedule.databinding.FragmentNewsBinding
 import com.example.schedule.domain.Resource
@@ -49,7 +50,7 @@ class NewsFragment : Fragment() {
                 }
                 is Resource.Error -> {
                     hideProgressBar()
-                    Toast.makeText(requireContext(), "ошибка загрузки новостей", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), resources.getString(R.string.loading_news_failed), Toast.LENGTH_SHORT).show()
                 }
                 is Resource.Loading -> showProgressBar()
             }

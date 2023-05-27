@@ -8,11 +8,9 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.schedule.data.model.News
 import com.example.schedule.data.model.Teacher
 import com.example.schedule.databinding.FragmentTeachersBinding
 import com.example.schedule.domain.Resource
-import com.example.schedule.presentation.adapters.NewsAdapter
 import com.example.schedule.presentation.adapters.TeachersAdapter
 import com.example.schedule.presentation.viewmodels.ScheduleViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,7 +30,7 @@ class TeachersFragment : Fragment() {
         val tmpViewModel by viewModels<ScheduleViewModel>()
         viewModel = tmpViewModel
         viewModel.getTeachers()
-        setupNewsObserver()
+        setupTeachersObserver()
         return binding.root
     }
 
@@ -42,7 +40,7 @@ class TeachersFragment : Fragment() {
             adapter = TeachersAdapter(data)
         }
     }
-    private fun setupNewsObserver() {
+    private fun setupTeachersObserver() {
         viewModel.teachers.observe(viewLifecycleOwner){resource ->
             when(resource){
                 is Resource.Success ->{
@@ -51,7 +49,7 @@ class TeachersFragment : Fragment() {
                 }
                 is Resource.Error -> {
                     hideProgressBar()
-                    Toast.makeText(requireContext(), "ошибка загрузки новостей", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), resource.message, Toast.LENGTH_SHORT).show()
                 }
                 is Resource.Loading -> showProgressBar()
             }

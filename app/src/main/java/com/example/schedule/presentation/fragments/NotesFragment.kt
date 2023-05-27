@@ -1,29 +1,23 @@
 package com.example.schedule.presentation.fragments
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.schedule.R
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.example.schedule.data.model.Note
 import com.example.schedule.databinding.FragmentNotesBinding
-import com.example.schedule.databinding.SheduleItemBinding
 import com.example.schedule.presentation.adapters.NoteClickDeleteInterface
 import com.example.schedule.presentation.adapters.NoteClickInterface
 import com.example.schedule.presentation.adapters.NoteRVAdapter
 import com.example.schedule.presentation.viewmodels.ScheduleViewModel
-import com.example.schedule.presentation.fragments.AddFragment
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
-import org.apache.commons.math3.analysis.function.Add
+
 @AndroidEntryPoint
 class NotesFragment : Fragment(), NoteClickInterface, NoteClickDeleteInterface {
     private var _binding: FragmentNotesBinding? = null
@@ -51,12 +45,13 @@ class NotesFragment : Fragment(), NoteClickInterface, NoteClickDeleteInterface {
 
         val tmpViewModel by viewModels<ScheduleViewModel>()
         viewModel = tmpViewModel
+        viewModel.getNotes()
 
-        viewModel.allNotes.observe(viewLifecycleOwner, Observer { list ->
+        viewModel.notes.observe(viewLifecycleOwner) { list ->
             list?.let {
                 noteRVAdapter.updateList(it)
             }
-        })
+        }
 
         addFAB.setOnClickListener {
             val addFragment = AddFragment()
@@ -90,6 +85,5 @@ class NotesFragment : Fragment(), NoteClickInterface, NoteClickDeleteInterface {
 
     override fun onDeleteIconClick(note: Note) {
         viewModel.deleteNote(note)
-        Toast.makeText(requireContext(), "${note.noteTitle} Deleted", Toast.LENGTH_LONG).show()
     }
 }

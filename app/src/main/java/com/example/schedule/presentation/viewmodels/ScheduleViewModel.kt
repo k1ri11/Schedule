@@ -24,7 +24,7 @@ class ScheduleViewModel @Inject constructor(
     val parseState: LiveData<Resource<String>> = repository.parseState
     val downloadingState: LiveData<Resource<String>> = repository.downloadingState
     val platoonSchedule: LiveData<Resource<List<Lesson>>> = repository.platoonSchedule
-    val allNotes: LiveData<List<Note>> = repository.getNotes
+    val notes: LiveData<List<Note>> = repository.notes
     fun parseExelAndUpdateDatabase(fileName: String) = viewModelScope.launch(Dispatchers.IO) {
         repository.parseExelAndUpdateDatabase(fileName)
     }
@@ -46,19 +46,19 @@ class ScheduleViewModel @Inject constructor(
     }
 
 
-    fun getNote() = viewModelScope.launch(Dispatchers.IO){
+    fun getNotes() = viewModelScope.launch(Dispatchers.IO){
         repository.getNotes()
     }
 
     fun deleteNote(note: Note) = viewModelScope.launch(Dispatchers.IO) {
-        repository.delete(note)
+        repository.deleteNote(note)
     }
 
     fun updateNote(note: Note) = viewModelScope.launch(Dispatchers.IO) {
-        repository.update(note)
+        repository.updateNote(note)
     }
 
     fun addNote(note: Note) = viewModelScope.launch(Dispatchers.IO) {
-        repository.insert(note)
+        repository.insertNote(note)
     }
 }
