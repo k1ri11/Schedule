@@ -98,6 +98,7 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
                         withContext(Dispatchers.Main) { setupPlatoonSpinner(viewState.platoonNumbers) }
                     }
                 } else {
+                    Toast.makeText(requireContext(), resources.getString(R.string.platoons_loading), Toast.LENGTH_SHORT).show()
                     viewState.course = dialogBinding.courseSpinner.selectedItemPosition + 3
                     viewModel.downloadSchedule(viewState.course)
                 }
@@ -110,7 +111,7 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
                 viewState.course = course
                 viewState.platoon = platoonNumber
                 updateUIStatePrefs()
-                viewModel.getPlatoonWithLessons(platoonNumber, 2)
+                viewModel.getPlatoonWithLessons(platoonNumber, 1)
                 binding.selectedPlatoon.text = resources.getString(R.string.selected_platoon, platoonNumber)
                 dialog.dismiss()
             }
@@ -175,7 +176,7 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
                     val schedule = result.data!!
                     scheduleAdapter.scheduler = schedule
                     if (schedule.isEmpty()) {
-                        Toast.makeText(requireContext(), "Выходной", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), resources.getString(R.string.free_day), Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -240,14 +241,14 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
             val info = list.find { workInfo.second == it.id }
             when (info?.state) {
                 WorkInfo.State.SUCCEEDED -> {
-                    Toast.makeText(requireContext(), "downloading successful", Toast.LENGTH_SHORT)
+                    Toast.makeText(requireContext(), resources.getString(R.string.download_successful), Toast.LENGTH_SHORT)
                         .show()
                     val fileName = info.outputData.keyValueMap[WorkerKeys.FILE_URI] as String
                     viewModel.parseExelAndUpdateDatabase(fileName)
                 }
 
                 WorkInfo.State.FAILED -> {
-                    Toast.makeText(requireContext(), "downloading failed", Toast.LENGTH_SHORT)
+                    Toast.makeText(requireContext(), resources.getString(R.string.download_failed), Toast.LENGTH_SHORT)
                         .show()
                 }
 
