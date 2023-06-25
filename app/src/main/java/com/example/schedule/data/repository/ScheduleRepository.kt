@@ -10,6 +10,7 @@ import com.example.schedule.data.model.News
 import com.example.schedule.data.model.Note
 import com.example.schedule.data.model.Platoon
 import com.example.schedule.data.model.Teacher
+import com.example.schedule.domain.NetworkUtils
 import com.example.schedule.domain.Resource
 import com.example.schedule.domain.parser.ExelParser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,6 +23,7 @@ class ScheduleRepository @Inject constructor(
     private val exelParser: ExelParser,
     @ApplicationContext private val context: Context,
     private val dao: ScheduleDao,
+    private val networkUtils: NetworkUtils,
     private val cloudStore: FirebaseFirestore,
     private val fireStore: StorageReference
 ) {
@@ -49,15 +51,20 @@ class ScheduleRepository @Inject constructor(
 
 
     suspend fun downloadSchedule(course: Int) {
-        _downloadingState.postValue(Resource.Loading())
-        val file = File(context.filesDir, "downloaded_course_$course.xlsx")
-        val task = fireStore.child("shedule_vuc_$course.xlsx").getFile(file)
-        task.addOnCompleteListener {
-            _downloadingState.postValue(Resource.Success(file.name))
+        if (networkUtils.hasInternetConnection()){
+            _downloadingState.postValue(Resource.Loading())
+            val file = File(context.filesDir, "downloaded_course_$course.xlsx")
+            val task = fireStore.child("shedule_vuc_$course.xlsx").getFile(file)
+            task.addOnCompleteListener {
+                _downloadingState.postValue(Resource.Success(file.name))
+            }
+            task.addOnFailureListener { exception ->
+                _downloadingState.postValue(Resource.Error(exception.message ?: context.resources.getString(R.string.download_failed)))
+            }
+        }else{
+            _downloadingState.postValue(Resource.Error(context.getString(R.string.no_connection)))
         }
-        task.addOnFailureListener { exception ->
-            _downloadingState.postValue(Resource.Error(exception.message ?: context.resources.getString(R.string.download_failed)))
-        }
+
     }
 
 

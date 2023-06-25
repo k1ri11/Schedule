@@ -38,6 +38,7 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
     private val scheduleAdapter = ScheduleAdapter()
     private lateinit var dialogBinding: DialogSelectPlatoonBinding
     private lateinit var prefs: SharedPreferences
+    private lateinit var dialog: Dialog
 
     private val viewState = ScheduleViewState()
 
@@ -80,7 +81,7 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
     }
 
     private fun setupDialog() {
-        val dialog = Dialog(
+        dialog = Dialog(
             requireContext(),
             com.google.android.material.R.style.ThemeOverlay_Material3_DayNight_BottomSheetDialog
         )
@@ -225,8 +226,8 @@ class ScheduleFragment : Fragment(), WeekAdapter.OnItemClickListener {
                 is Resource.Success -> {
                     viewModel.parseExelAndUpdateDatabase(result.data!!)
                 }
-
                 is Resource.Error -> {
+                    if (this::dialog.isInitialized) dialog.dismiss()
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
                 }
 
