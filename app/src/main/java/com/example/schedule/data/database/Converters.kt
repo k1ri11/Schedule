@@ -11,7 +11,9 @@ class Converters {
             LessonType.Practice -> "practice"
             LessonType.Seminar -> "seminar"
             LessonType.SelfStudy -> "selfStudy"
+            LessonType.GroupExercise -> "groupExercise"
             LessonType.Test -> "test"
+            LessonType.Exam -> "exam"
         }
     }
 
@@ -22,7 +24,9 @@ class Converters {
             "practice" -> LessonType.Practice
             "seminar" -> LessonType.Seminar
             "selfStudy" -> LessonType.SelfStudy
+            "groupExercise" -> LessonType.GroupExercise
             "test" -> LessonType.Test
+            "exam" -> LessonType.Exam
             else -> LessonType.Lecture
         }
     }

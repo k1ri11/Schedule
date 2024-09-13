@@ -5,6 +5,7 @@ import com.example.schedule.data.model.LessonType
 import com.example.schedule.domain.Resource
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.ss.usermodel.WorkbookFactory
@@ -39,7 +40,7 @@ class ExelParser @Inject constructor() {
         if (book.numberOfSheets > 0) {
             var weekNumber = 0
             val sheet = book.getSheetAt(0)
-            var curRowNumber = 5
+            var curRowNumber = 6
             repeat(4) {// читаем каждый месяц (страницу)
                 repeat(5) {//читаем каждый день недели
                     parseDay(curRowNumber, sheet, weekNumber)
@@ -53,22 +54,22 @@ class ExelParser @Inject constructor() {
     }
 
     private fun parseDay(curRowNumber: Int, sheet: Sheet, weekNumber: Int) {
-        var curColNumber = 3
+        var curColNumber = 2
         var curWeekNumber = weekNumber
         val platoonRow = sheet.getRow(curRowNumber)
-        for (i in 1 .. 16) {
+        for (i in 1 .. 24) {
             // парсим всю строку с 1 по 4 пару за один день
             val platoon = parsePlatoon(platoonRow, curColNumber)
             if (platoon == 0) {
                 curColNumber += 2
-                if (i % 4 == 0) curWeekNumber++
+                if (i % 6 == 0) curWeekNumber++
                 continue
             }
             val lessons =
                 parseLessons(curRowNumber + 1, curColNumber, sheet, platoon, curWeekNumber)
             platoonsWithSchedule[platoon]?.add(lessons)
             curColNumber += 2
-            if (i % 4 == 0) curWeekNumber++
+            if (i % 6 == 0) curWeekNumber++
         }
     }
 
@@ -109,8 +110,8 @@ class ExelParser @Inject constructor() {
         val result = mutableListOf<String>()
         val teacherRow = sheet.getRow(teacherRowNumber)
         repeat(2) {
-            val teacherCell = teacherRow.getCell(colNumber + it)
-            if (teacherCell.cellType != CellType.BLANK) {
+            val teacherCell = teacherRow.getCell(colNumber + it, MissingCellPolicy.CREATE_NULL_AS_BLANK)
+            if (teacherCell.cellType != CellType.BLANK ) {
                 result.add(teacherCell.stringCellValue.trim())
             } else {
                 result.add("")
@@ -138,8 +139,10 @@ class ExelParser @Inject constructor() {
         return when {
             this.endsWith("/л") -> LessonType.Lecture
             this.endsWith("/с") -> LessonType.Seminar
+            this.endsWith("/гз") -> LessonType.GroupExercise
             this.endsWith("з") -> LessonType.Practice
             this.endsWith("зачет") -> LessonType.Test
+            this.endsWith("экзамен") -> LessonType.Exam
             else -> LessonType.SelfStudy
         }
     }
